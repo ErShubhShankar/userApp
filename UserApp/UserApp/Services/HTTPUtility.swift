@@ -17,7 +17,7 @@ final class HTTPUtility {
             var component = URLComponents()
             component.scheme = "https"
             component.host = Constant.baseURL.rawValue
-            component.path = Constant.urlPath.rawValue+"/"+apiMethod.rawValue
+            component.path = Constant.urlPath.rawValue+"/"+apiMethod.string
             if httpMethod == .GET {
                 var arrQueryItems: [URLQueryItem] = []
                 for (key, value) in parameter {
@@ -35,7 +35,7 @@ final class HTTPUtility {
             request.allHTTPHeaderFields = headers
             request.httpMethod = httpMethod.rawValue
             request.cachePolicy = .reloadIgnoringCacheData
-            request.timeoutInterval = TimeInterval(60)
+            request.timeoutInterval = TimeInterval(20)
             if requestBody != nil, httpMethod != .GET {
                 request.httpBody = requestBody
             }
@@ -44,6 +44,8 @@ final class HTTPUtility {
                     guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
                         throw NetworkError.responseError
                     }
+                    let response = String(data: data, encoding: .utf8) ?? ""
+                    print("******* RESPONSE ******** \n", response)
                     return data
                 }
                 .decode(type: T.self, decoder: JSONDecoder())

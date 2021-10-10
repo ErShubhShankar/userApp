@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import UIKit
+import Kingfisher
 
 extension NetworkError: LocalizedError {
     var errorDescription: String? {
@@ -30,5 +32,84 @@ extension CustomStringConvertible where Self: Codable {
             }
         }
         return description
+    }
+}
+
+extension UIView {
+    @IBInspectable var cornerRadius: CGFloat {
+        set {
+            layer.cornerRadius = newValue
+        } get {
+            return layer.cornerRadius
+        }
+    }
+    
+    func dropShadow(color: UIColor, opacity: Float = 0.5, offSet: CGSize, radius: CGFloat = 1, scale: Bool = true) {
+        layer.masksToBounds = false
+        layer.shadowColor = color.cgColor
+        layer.shadowOpacity = opacity
+        layer.shadowOffset = offSet
+        layer.shadowRadius = radius
+        layer.shouldRasterize = true
+        layer.rasterizationScale = scale ? UIScreen.main.scale : 1
+      }
+    
+    func bounceAnimation(duration: CGFloat = 0.5,
+                         animationValues: [CGFloat] = [1.0, 1.4, 0.9, 1.15, 0.95, 1.02, 1.0],
+                         completion: (() -> Swift.Void)? = nil) {
+        let bounceAnimation = CAKeyframeAnimation(keyPath: "transform.scale")
+        bounceAnimation.values = animationValues
+        bounceAnimation.duration = TimeInterval(duration)
+        bounceAnimation.calculationMode = CAAnimationCalculationMode.cubic
+        CATransaction.begin()
+        CATransaction.setCompletionBlock(completion)
+        layer.add(bounceAnimation, forKey: nil)
+        CATransaction.commit()
+    }
+}
+
+extension UICollectionViewCell {
+  static var reuseIdentifier: String {
+    return String(describing: self)
+  }
+  static func register(for collectionView: UICollectionView) {
+    let bundle = Bundle(for: self)
+    let cellName = String(describing: self)
+    let cellIdentifier = reuseIdentifier
+    let cellNib = UINib(nibName: cellName, bundle: bundle)
+    collectionView.register(cellNib, forCellWithReuseIdentifier: cellIdentifier)
+  }
+    
+    static func registerClass(for collectionView: UICollectionView) {
+        collectionView.register(self, forCellWithReuseIdentifier: reuseIdentifier)
+    }
+
+  static func register(for collectionViews: [UICollectionView]) {
+    collectionViews.forEach({
+      register(for: $0)
+    })
+  }
+}
+
+extension UICollectionView {
+    func dequeueCell<T: UICollectionViewCell>(for indexPath: IndexPath) -> T {
+      guard let cell = dequeueReusableCell(withReuseIdentifier: T.reuseIdentifier, for: indexPath) as? T else {
+        fatalError("Could not deque cell -> \(T.reuseIdentifier)")
+      }
+      return cell
+    }
+}
+
+
+extension UIImageView {
+    func downloadImage(imageInfo: ImageInfo, completion: ((Bool) -> Void)? = nil) {
+        var options: KingfisherOptionsInfo? = [.memoryCacheExpiration(.days(5)), .diskCacheExpiration(.days(5))]
+        if !imageInfo.storeInCache {
+            options = [.memoryCacheExpiration(.expired), .diskCacheExpiration(.expired)]
+        }
+        let url = URL(string: imageInfo.fileUrl)
+        self.kf.setImage(with: url, options: options) { (_) in
+            self.contentMode = imageInfo.contentMode
+        }
     }
 }
