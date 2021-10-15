@@ -28,7 +28,9 @@ class UserCollectionCell: UICollectionViewCell {
     
     private func setDetail() {
         guard let item = user else { return }
-        let name = item.title+". " + item.firstName+" "+item.lastName
+        var title = (item.title ?? "")
+        title = title.isEmpty ? "" : title+". "
+        let name = title + item.firstName+" "+item.lastName
         labelUserName.text = name.capitalized
         labelUserDescription.text = item.id
         if let imageURL = item.picture, !imageURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

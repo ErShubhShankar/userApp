@@ -21,13 +21,16 @@ enum Constant: String {
 enum APIMethods {
     case user
     case userBy(id: String)
+    case createUser
     
     var string: String {
         switch self {
         case .user:
-            return "user"
+            return "/user"
         case .userBy(let id):
-            return "user/\(id)"
+            return "/user/\(id)"
+        case .createUser:
+            return "/user/create"
         }
     }
 }
@@ -36,6 +39,7 @@ enum HTTPMethod: String {
     case POST
     case PUT
     case GET
+    case DELETE
 }
 
 

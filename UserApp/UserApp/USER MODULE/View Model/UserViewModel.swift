@@ -43,4 +43,19 @@ class UserViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
+    func create(user: User) {
+        let postData = try? JSONEncoder().encode(user)
+        utility.request(apiMethod: .createUser, httpMethod: .POST, requestBody: postData)
+            .sink(receiveCompletion: { [weak self] completion in
+                switch completion {
+                case .failure(let err):
+                    self?.userSubject.send(completion: .failure(err))
+                case .finished: break
+                }
+            }, receiveValue: { [weak self] result in
+                self?.userDetailSubject.send(result)
+            })
+            .store(in: &cancellables)
+    }
 }

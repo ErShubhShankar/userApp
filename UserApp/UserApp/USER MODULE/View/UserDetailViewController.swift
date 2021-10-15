@@ -9,6 +9,8 @@ import UIKit
 import Combine
 
 class UserDetailViewController: UIViewController {
+    @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
+   
     var userID: String?
     private var viewModel = UserViewModel()
     private var subscriber: AnyCancellable?
@@ -17,8 +19,6 @@ class UserDetailViewController: UIViewController {
             setDetails()
         }
     }
-    
-    @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
     
     override func viewDidLoad() {
         super.viewDidLoad()

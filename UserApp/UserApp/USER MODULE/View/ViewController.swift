@@ -26,9 +26,13 @@ class ViewController: UIViewController {
         return 10
     }
     
-    
-    @IBOutlet weak var viewAddBG: UIView!
+    @IBOutlet weak private var viewAddUser: UIView!
+    @IBOutlet weak private var buttonAdd: UIButton!
+    @IBOutlet weak private var viewAddBG: UIView!
     @IBOutlet weak private var activityIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var textFieldFName: UITextField!
+    @IBOutlet weak var textFieldLName: UITextField!
+    @IBOutlet weak var textFieldEmail: UITextField!
     @IBOutlet weak private var collectionUsers: UICollectionView!
     
     override func viewDidLoad() {
@@ -37,8 +41,21 @@ class ViewController: UIViewController {
         viewModel.getUsers(page: 1, limit: limit)
         setupCollectionView()
         setSubscriber()
-        let shadowColor = #colorLiteral(red: 0.9647058824, green: 0.7607843137, blue: 0.2588235294, alpha: 1)
-        viewAddBG.dropShadow(color: shadowColor, opacity: 1, offSet: CGSize(width: 0, height: 0), radius: 23)
+        setupUI()
+    }
+    
+    private func setupUI() {
+        let shadowThemeColor = #colorLiteral(red: 0.9647058824, green: 0.7607843137, blue: 0.2588235294, alpha: 1)
+        let black10color = #colorLiteral(red: 0, green: 0, blue: 0, alpha: 0.1)
+        viewAddBG.dropShadow(color: shadowThemeColor, opacity: 1, offSet: CGSize(width: 0, height: 0), radius: 23)
+        buttonAdd.dropShadow(color: black10color, opacity: 1, offSet: CGSize(width: 0, height: 0), radius: 5)
+        viewAddUser.dropShadow(color: .black, opacity: 1, offSet: CGSize(width: 0, height: 0), radius: 100)
+        textFieldFName.textContentType = .givenName
+        textFieldLName.textContentType = .middleName
+        textFieldEmail.textContentType = .emailAddress
+        textFieldFName.delegate = self
+        textFieldLName.delegate = self
+        textFieldEmail.delegate = self
     }
     
     private func setupCollectionView() {
@@ -64,6 +81,46 @@ class ViewController: UIViewController {
     
     @IBAction func actionOnButtonAdd(_ sender: UIButton) {
         sender.bounceAnimation()
+        sender.isUserInteractionEnabled = false
+        viewAddUser.transform = CGAffineTransform(scaleX: 0, y: 0)
+        if viewAddUser.isHidden {
+            UIView.animate(withDuration: 0.4, animations: {
+                self.viewAddUser.alpha = 1.0
+                self.viewAddUser.transform =  .identity
+                self.viewAddUser.isHidden = false
+            }, completion: {_ in
+                sender.isUserInteractionEnabled = true
+            })
+        }
+    }
+    
+    @IBAction func actionOnButtonAddUser(_ sender: UIButton) {
+        view.endEditing(true)
+        guard let fName = textFieldFName.text, !fName.isEmpty else {
+            textFieldFName.superview?.shake()
+            return
+        }
+        guard let lName = textFieldLName.text, !lName.isEmpty else {
+            textFieldLName.superview?.shake()
+            return
+        }
+        guard let email = textFieldEmail.text, !email.isEmpty else {
+            textFieldEmail.superview?.shake()
+            return
+        }
+        //TODO: ADD VALIDATION
+        let  user = User(id: "1", firstName: fName, lastName: lName, email: email)
+        viewModel.create(user: user)
+    }
+    
+    @IBAction func actionOnButtonClose(_ sender: UIButton) {
+        view.endEditing(true)
+        UIView.animate(withDuration: 0.4, animations: {
+            self.viewAddUser.alpha = 0
+            self.viewAddUser.transform = CGAffineTransform(scaleX: 0, y: 0)
+        }) { _ in
+            self.viewAddUser.isHidden = true
+        }
     }
 }
 
@@ -136,5 +193,19 @@ extension ViewController: UICollectionViewDelegate {
                 cell.viewBG.transform = .identity
             }
         }
+    }
+}
+
+extension ViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        switch textField {
+        case textFieldFName:
+            textFieldLName.becomeFirstResponder()
+        case textFieldLName:
+            textFieldEmail.becomeFirstResponder()
+        default:
+            view.endEditing(true)
+        }
+        return true
     }
 }

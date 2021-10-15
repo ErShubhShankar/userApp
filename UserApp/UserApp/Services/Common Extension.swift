@@ -44,6 +44,22 @@ extension UIView {
         }
     }
     
+    @IBInspectable var borderColor: UIColor {
+        set {
+            layer.borderColor = newValue.cgColor
+        } get {
+            return UIColor(cgColor: layer.borderColor ?? CGColor.init(red: 0, green: 0, blue: 0, alpha: 0))
+        }
+    }
+    
+    @IBInspectable var borderWidth: CGFloat {
+        set {
+            layer.borderWidth = newValue
+        } get {
+            return layer.borderWidth
+        }
+    }
+    
     func dropShadow(color: UIColor, opacity: Float = 0.5, offSet: CGSize, radius: CGFloat = 1, scale: Bool = true) {
         layer.masksToBounds = false
         layer.shadowColor = color.cgColor
@@ -65,6 +81,17 @@ extension UIView {
         CATransaction.setCompletionBlock(completion)
         layer.add(bounceAnimation, forKey: nil)
         CATransaction.commit()
+    }
+    
+    func shake(for duration: TimeInterval = 0.5, withTranslation translation: CGFloat = 10) {
+        let propertyAnimator = UIViewPropertyAnimator(duration: duration, dampingRatio: 0.3) {
+            self.transform = CGAffineTransform(translationX: translation, y: 0)
+        }
+        propertyAnimator.addAnimations({
+            self.transform = CGAffineTransform(translationX: 0, y: 0)
+        }, delayFactor: 0.2)
+        
+        propertyAnimator.startAnimation()
     }
 }
 

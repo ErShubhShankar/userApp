@@ -17,7 +17,7 @@ final class HTTPUtility {
             var component = URLComponents()
             component.scheme = "https"
             component.host = Constant.baseURL.rawValue
-            component.path = Constant.urlPath.rawValue+"/"+apiMethod.string
+            component.path = Constant.urlPath.rawValue+apiMethod.string
             if httpMethod == .GET {
                 var arrQueryItems: [URLQueryItem] = []
                 for (key, value) in parameter {
