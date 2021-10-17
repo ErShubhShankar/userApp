@@ -38,10 +38,13 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         activityIndicator.startAnimating()
-        viewModel.getUsers(page: 1, limit: limit)
         setupCollectionView()
         setSubscriber()
         setupUI()
+    }
+    
+    func getData() {
+        viewModel.getUsers(page: 1, limit: limit)
     }
     
     private func setupUI() {

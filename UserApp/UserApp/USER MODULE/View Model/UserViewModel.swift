@@ -11,6 +11,7 @@ import Combine
 class UserViewModel: ObservableObject {
     var userSubject = PassthroughSubject<Users, Error>()
     var userDetailSubject = PassthroughSubject<UserDetail, Error>()
+    var deleteResponse = PassthroughSubject<DeleteResponse, Error>()
     
     private let utility = HTTPUtility()
     private var cancellables = Set<AnyCancellable>()
@@ -35,7 +36,7 @@ class UserViewModel: ObservableObject {
             .sink(receiveCompletion: { [weak self] completion in
                 switch completion {
                 case .failure(let err):
-                    self?.userSubject.send(completion: .failure(err))
+                    self?.userDetailSubject.send(completion: .failure(err))
                 case .finished: break
                 }
             }, receiveValue: { [weak self] result in
@@ -55,6 +56,20 @@ class UserViewModel: ObservableObject {
                 }
             }, receiveValue: { [weak self] result in
                 self?.userDetailSubject.send(result)
+            })
+            .store(in: &cancellables)
+    }
+    
+    func deleteUser(id: String) {
+        utility.request(apiMethod: .deleteUser(id: id), httpMethod: .DELETE)
+            .sink(receiveCompletion: { [weak self] completion in
+                switch completion {
+                case .failure(let err):
+                    self?.deleteResponse.send(completion: .failure(err))
+                case .finished: break
+                }
+            }, receiveValue: { [weak self] (result: DeleteResponse) in
+                self?.deleteResponse.send(result)
             })
             .store(in: &cancellables)
     }

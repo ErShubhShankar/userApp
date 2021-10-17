@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - UserResponse
 struct Users: Codable, CustomStringConvertible {
-    let data: [User]?
+    var data: [User]?
 }
 
 struct User: Codable, CustomStringConvertible, Hashable {
@@ -27,11 +27,15 @@ struct UserDetail: Codable {
     let id, title, firstName: String
     let lastName: String?
     let picture: String?
-    let gender, email, dateOfBirth, phone: String?
+    var gender, email, dateOfBirth, phone: String?
     let location: Location?
 }
 
 // MARK: - Location
 struct Location: Codable {
     let street, city, state, country: String?
+}
+
+struct DeleteResponse: Codable {
+    let id: String
 }
