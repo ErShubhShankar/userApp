@@ -39,11 +39,17 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         activityIndicator.startAnimating()
         setupCollectionView()
+        getData()
         setSubscriber()
         setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.isNavigationBarHidden = false
+    }
     func getData() {
+        arrayUsers.removeAll()
         viewModel.getUsers(page: 1, limit: limit)
     }
     

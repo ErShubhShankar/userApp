@@ -70,6 +70,7 @@ class UserDetailViewController: UIViewController {
         } receiveValue: {[weak self] detail in
             let viewController = self?.navigationController?.viewControllers.filter({$0 is ViewController}).first as? ViewController
             viewController?.getData()
+            self?.navigationController?.popViewController(animated: true)
             self?.activityIndicator.stopAnimating()
         }
         
