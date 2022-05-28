@@ -10,6 +10,42 @@ import Combine
 
 final class HTTPUtility {
     private var cancellables = Set<AnyCancellable>()
+    typealias NetworkResponse = (data: Data, response: URLResponse)
+    
+    private func getURLRequest(apiMethod: APIMethods, parameteres: [String: String] = [:], requestBody: Data? = nil) throws -> URLRequest {
+        var component = URLComponents()
+        component.scheme = "https"
+        component.host = Constant.baseURL.rawValue
+        component.path = Constant.urlPath.rawValue+apiMethod.string
+        
+        if apiMethod.httpMethod == "GET" {
+            var arrQueryItems: [URLQueryItem] = []
+            for (key, value) in parameteres {
+                let queryItem = URLQueryItem(name: key, value: value)
+                arrQueryItems.append(queryItem)
+            }
+            component.queryItems = arrQueryItems.isEmpty ? nil : arrQueryItems
+        }
+        guard let completeURL = component.url else {
+            throw NetworkError.invalidURL
+        }
+        let headers = ["app-id": Constant.appID.rawValue]
+        var request = URLRequest(url: completeURL)
+        request.allHTTPHeaderFields = headers
+        request.httpMethod = apiMethod.httpMethod
+        request.cachePolicy = .reloadIgnoringCacheData
+        request.timeoutInterval = TimeInterval(20)
+        if requestBody != nil, apiMethod.httpMethod != "GET" {
+            request.httpBody = requestBody
+        }
+        return request
+    }
+    
+    func request<T: Decodable>(apiMethod: APIMethods, parameteres: [String: String] = [:], requestBody: Data? = nil) async throws -> T {
+        let request = try getURLRequest(apiMethod: apiMethod, parameteres: parameteres, requestBody: requestBody)
+        let response: NetworkResponse = try await URLSession.shared.data(for: request)
+        return try JSONDecoder().decode(T.self, from: response.data)
+    }
     
     func request<T: Codable>(apiMethod: APIMethods, httpMethod: HTTPMethod = .GET, parameter: [String: String] = [:],
                              requestBody: Data? = nil) -> Future<T, Error> {
@@ -39,13 +75,14 @@ final class HTTPUtility {
             if requestBody != nil, httpMethod != .GET {
                 request.httpBody = requestBody
             }
+
             URLSession.shared.dataTaskPublisher(for: request)
                 .tryMap { (data, response) -> Data in
+                    let jsonResponse = String(data: data, encoding: .utf8) ?? ""
+                    print("******* RESPONSE ******** \n", jsonResponse)
                     guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
                         throw NetworkError.responseError
                     }
-                    let response = String(data: data, encoding: .utf8) ?? ""
-                    print("******* RESPONSE ******** \n", response)
                     return data
                 }
                 .decode(type: T.self, decoder: JSONDecoder())

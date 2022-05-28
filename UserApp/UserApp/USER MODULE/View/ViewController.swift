@@ -39,7 +39,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         activityIndicator.startAnimating()
         setupCollectionView()
-        getData()
+        getUser()
         setSubscriber()
         setupUI()
     }
@@ -48,9 +48,23 @@ class ViewController: UIViewController {
         super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = false
     }
+    
+    func getUser() {
+        arrayUsers.removeAll()
+        Task {
+            do {
+                let users = try await viewModel.getUsers(page: 1, limit: limit)
+                arrayUsers.append(contentsOf: users.data ?? [])
+                applySnapShot()
+                activityIndicator.stopAnimating()
+            } catch {
+                print(error.localizedDescription)
+            }
+        }
+    }
     func getData() {
         arrayUsers.removeAll()
-        viewModel.getUsers(page: 1, limit: limit)
+        viewModel.getUsers(page: currentPage, limit: limit)
     }
     
     private func setupUI() {
@@ -118,7 +132,7 @@ class ViewController: UIViewController {
             return
         }
         //TODO: ADD VALIDATION
-        let  user = User(id: "1", firstName: fName, lastName: lName, email: email)
+        let user = PostUser(firstName: fName, lastName: lName, email: email)
         viewModel.create(user: user)
     }
     
@@ -173,7 +187,7 @@ extension ViewController: UICollectionViewDelegate {
             currentPage += 1
             self.activityIndicator.startAnimating()
             viewModel.getUsers(page: currentPage, limit: limit)
-        } 
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -187,7 +201,7 @@ extension ViewController: UICollectionViewDelegate {
         }
     }
     
-    //ANIMATION
+    //FOR ANIMATION
     func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
         if let cell = collectionView.cellForItem(at: indexPath) as? UserCollectionCell {
             UIView.animate(withDuration: 0.3) {

@@ -23,7 +23,7 @@ enum APIMethods {
     case userBy(id: String)
     case createUser
     case deleteUser(id: String)
-    
+
     var string: String {
         switch self {
         case .user:
@@ -34,6 +34,19 @@ enum APIMethods {
             return "/user/create"
         case .deleteUser(let id):
             return "/user/\(id)"
+        }
+    }
+    
+    var httpMethod: String {
+        switch self {
+        case .user:
+            return "GET"
+        case .userBy:
+            return "GET"
+        case .createUser:
+            return "POST"
+        case .deleteUser:
+            return "DELETE"
         }
     }
 }

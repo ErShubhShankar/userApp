@@ -15,11 +15,17 @@ struct Users: Codable, CustomStringConvertible {
 
 struct User: Codable, CustomStringConvertible, Hashable {
     let id: String
-    var title: String? = ""
+    var title: String? = "ms"
     let firstName: String
     let lastName: String
     let email: String?
-    var picture: String? = ""
+    var picture: String? = "dfgd"
+}
+
+struct PostUser: Codable, CustomStringConvertible, Hashable {
+    let firstName: String
+    let lastName: String
+    let email: String
 }
 
 // MARK: - UserDetail
